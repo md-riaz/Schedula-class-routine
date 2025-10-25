@@ -153,452 +153,488 @@
 		const weekendSlots = generateTimeSlots('weekend');
 		timeSlots.set([...daySlots, ...eveningSlots, ...weekendSlots]);
 
-		// Initialize schedule entries based on Pundra University routine (Saturday schedule for HSC batches)
+		// Initialize schedule entries based on Pundra University routine - EXACT MATCH
 		scheduleEntries.set([
-			// SATURDAY - Batch 27B
+			// SATURDAY 9:30-11:00 - Multiple batches
 			{
-				id: 'entry-sat-27b-1',
+				id: 'entry-sat-27b-slot0',
 				courseId: 'course-eee-1101',
 				teacherId: 'teacher-ric',
 				roomId: 'room-nb-508',
-				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				timeSlotId: 'day-Saturday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '27B'
 			},
 			{
-				id: 'entry-sat-27b-2',
-				courseId: 'course-mat-1101',
-				teacherId: 'teacher-mj',
-				roomId: 'room-nb-504',
-				timeSlotId: 'day-Saturday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// SATURDAY - Batch 26B
-			{
-				id: 'entry-sat-26b-1',
+				id: 'entry-sat-26b-slot0',
 				courseId: 'course-mth-1201',
 				teacherId: 'teacher-mj',
 				roomId: 'room-nb-504',
-				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				timeSlotId: 'day-Saturday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '26B'
 			},
 			{
-				id: 'entry-sat-26b-2',
-				courseId: 'course-cse-1203',
-				teacherId: 'teacher-nh',
-				roomId: 'room-nb-408',
-				timeSlotId: 'day-Saturday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// SATURDAY - Batch 25B
-			{
-				id: 'entry-sat-25b-1',
-				courseId: 'course-cse-2105',
-				teacherId: 'teacher-sr',
-				roomId: 'room-nb-508',
-				timeSlotId: 'day-Saturday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			{
-				id: 'entry-sat-25b-2',
-				courseId: 'course-bus-2201',
-				teacherId: 'teacher-ejs',
-				roomId: 'room-nb-703',
-				timeSlotId: 'day-Saturday-2', // 2:00-3:30
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// SATURDAY - Batch 23B
-			{
-				id: 'entry-sat-23b-1',
+				id: 'entry-sat-23b-slot0',
 				courseId: 'course-cse-2203',
 				teacherId: 'teacher-amar',
 				roomId: 'room-nb-503',
-				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				timeSlotId: 'day-Saturday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '23B'
 			},
 			{
-				id: 'entry-sat-23b-2',
-				courseId: 'course-lamp-3201',
-				teacherId: 'teacher-jh',
-				roomId: 'room-nb-508',
-				timeSlotId: 'day-Saturday-2', // 2:00-3:30
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			{
-				id: 'entry-sat-23b-3',
-				courseId: 'course-bus-3101',
-				teacherId: 'teacher-uhl',
-				roomId: 'room-nb-703',
-				timeSlotId: 'day-Saturday-3', // 3:30-5:00
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// SATURDAY - Batch 22B
-			{
-				id: 'entry-sat-22b-1',
+				id: 'entry-sat-22b-slot0',
 				courseId: 'course-cse-3100',
 				teacherId: 'teacher-sr',
 				roomId: 'room-nb-406',
-				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				timeSlotId: 'day-Saturday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			{
-				id: 'entry-sat-22b-2',
+				id: 'entry-sat-21b-slot0',
+				courseId: 'course-cse-4201',
+				teacherId: 'teacher-rrp',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Saturday-0',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '21B'
+			},
+			
+			// SATURDAY 11:10-12:40 - Multiple batches
+			{
+				id: 'entry-sat-27b-slot1',
+				courseId: 'course-mat-1101',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Saturday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '27B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
+			},
+			{
+				id: 'entry-sat-26b-slot1',
+				courseId: 'course-cse-1203',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Saturday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '26B'
+			},
+			{
+				id: 'entry-sat-25b-slot1',
+				courseId: 'course-cse-2105',
+				teacherId: 'teacher-sr',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Saturday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '25B'
+			},
+			{
+				id: 'entry-sat-22b-slot1',
 				courseId: 'course-cse-3103',
 				teacherId: 'teacher-mrk',
 				roomId: 'room-nb-502',
-				timeSlotId: 'day-Saturday-1', // 11:10-12:40
+				timeSlotId: 'day-Saturday-1',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			
-			// SATURDAY - Batch 21B
+			// SATURDAY 2:00-3:30 PM - Multiple batches
 			{
-				id: 'entry-sat-21b-1',
-				courseId: 'course-cse-4201',
-				teacherId: 'teacher-rrp',
-				roomId: 'room-nb-408',
-				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				id: 'entry-sat-25b-slot2',
+				courseId: 'course-bus-2201',
+				teacherId: 'teacher-ejs',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Saturday-2',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '25B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE (with 24B)'
 			},
 			{
-				id: 'entry-sat-21b-2',
+				id: 'entry-sat-23b-slot2',
+				courseId: 'course-lamp-3201',
+				teacherId: 'teacher-jh',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Saturday-2',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '23B'
+			},
+			{
+				id: 'entry-sat-21b-slot2',
 				courseId: 'course-cse-3200',
 				teacherId: 'teacher-mbi',
 				roomId: 'room-nb-407',
-				timeSlotId: 'day-Saturday-2', // 2:00-3:30
+				timeSlotId: 'day-Saturday-2',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '21B'
 			},
 			
-			// SUNDAY - Batch 27B
+			// SATURDAY 3:30-5:00 PM
 			{
-				id: 'entry-sun-27b-1',
+				id: 'entry-sat-23b-slot3',
+				courseId: 'course-bus-3101',
+				teacherId: 'teacher-uhl',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Saturday-3',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '23B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
+			},
+			
+			// SUNDAY 9:30-11:00 - Multiple batches
+			{
+				id: 'entry-sun-27b-slot0',
 				courseId: 'course-phy-1101',
 				teacherId: 'teacher-mri',
 				roomId: 'room-nb-508',
-				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				timeSlotId: 'day-Sunday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '27B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
 			},
-			
-			// SUNDAY - Batch 26B
 			{
-				id: 'entry-sun-26b-1',
+				id: 'entry-sun-26b-slot0',
 				courseId: 'course-eee-1201',
 				teacherId: 'teacher-rh',
 				roomId: 'room-nb-702',
-				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				timeSlotId: 'day-Sunday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '26B',
+				isShared: true,
+				sharedWith: 'CSE+EEE'
 			},
-			
-			// SUNDAY - Batch 25B
 			{
-				id: 'entry-sun-25b-1',
-				courseId: 'course-cse-1204',
-				teacherId: 'teacher-nh',
-				roomId: 'room-nb-408',
-				timeSlotId: 'day-Sunday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// SUNDAY - Batch 23B
-			{
-				id: 'entry-sun-23b-1',
+				id: 'entry-sun-23b-slot0',
 				courseId: 'course-cse-4103',
 				teacherId: 'teacher-mrk',
 				roomId: 'room-nb-407',
-				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				timeSlotId: 'day-Sunday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '23B'
 			},
-			
-			// SUNDAY - Batch 22B
 			{
-				id: 'entry-sun-22b-1',
+				id: 'entry-sun-22b-slot0',
 				courseId: 'course-cse-4201',
 				teacherId: 'teacher-rrp',
 				roomId: 'room-nb-501',
-				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				timeSlotId: 'day-Sunday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			{
-				id: 'entry-sun-22b-2',
+				id: 'entry-sun-21b-slot0',
+				courseId: 'course-cse-4103',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-502',
+				timeSlotId: 'day-Sunday-0',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '21B'
+			},
+			
+			// SUNDAY 11:10-12:40
+			{
+				id: 'entry-sun-25b-slot1',
+				courseId: 'course-cse-1204',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Sunday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '25B'
+			},
+			{
+				id: 'entry-sun-22b-slot1',
 				courseId: 'course-cse-3205',
 				teacherId: 'teacher-mbi',
 				roomId: 'room-nb-501',
-				timeSlotId: 'day-Sunday-1', // 11:10-12:40
+				timeSlotId: 'day-Sunday-1',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			
-			// SUNDAY - Batch 21B
+			// SUNDAY 2:00-3:30 PM
 			{
-				id: 'entry-sun-21b-1',
-				courseId: 'course-cse-4103',
-				teacherId: 'teacher-itm',
-				roomId: 'room-nb-502',
-				timeSlotId: 'day-Sunday-0', // 9:30-11:00
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			{
-				id: 'entry-sun-21b-2',
+				id: 'entry-sun-21b-slot2',
 				courseId: 'course-cse-4104',
 				teacherId: 'teacher-itm',
 				roomId: 'room-nb-408',
-				timeSlotId: 'day-Sunday-2', // 2:00-3:30
+				timeSlotId: 'day-Sunday-2',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '21B'
 			},
 			
-			// MONDAY - Batch 27B
+			// MONDAY 9:30-11:00 - Multiple batches
 			{
-				id: 'entry-mon-27b-1',
+				id: 'entry-mon-27b-slot0',
 				courseId: 'course-eee-1102',
 				teacherId: 'teacher-ric',
 				roomId: 'room-nb-608',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '27B'
 			},
 			{
-				id: 'entry-mon-27b-2',
-				courseId: 'course-eng-1101',
-				teacherId: 'teacher-aam',
-				roomId: 'room-nb-703',
-				timeSlotId: 'day-Monday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// MONDAY - Batch 26B
-			{
-				id: 'entry-mon-26b-1',
+				id: 'entry-mon-26b-slot0',
 				courseId: 'course-phy-1201',
 				teacherId: 'teacher-mra',
 				roomId: 'room-nb-508',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '26B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
 			},
 			{
-				id: 'entry-mon-26b-2',
-				courseId: 'course-mth-1201',
-				teacherId: 'teacher-mj',
-				roomId: 'room-nb-504',
-				timeSlotId: 'day-Monday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// MONDAY - Batch 25B
-			{
-				id: 'entry-mon-25b-1',
+				id: 'entry-mon-25b-slot0',
 				courseId: 'course-mth-2101',
 				teacherId: 'teacher-mj',
 				roomId: 'room-nb-504',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '25B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
 			},
 			{
-				id: 'entry-mon-25b-2',
-				courseId: 'course-bus-2201',
-				teacherId: 'teacher-ejs',
-				roomId: 'room-nb-702',
-				timeSlotId: 'day-Monday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// MONDAY - Batch 23B
-			{
-				id: 'entry-mon-23b-1',
+				id: 'entry-mon-23b-slot0',
 				courseId: 'course-cse-3205',
 				teacherId: 'teacher-mzi',
 				roomId: 'room-nb-502',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '23B'
 			},
-			
-			// MONDAY - Batch 22B
 			{
-				id: 'entry-mon-22b-1',
+				id: 'entry-mon-22b-slot0',
 				courseId: 'course-cse-3201',
 				teacherId: 'teacher-nh',
 				roomId: 'room-nb-503',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			{
-				id: 'entry-mon-22b-2',
-				courseId: 'course-cse-3206',
-				teacherId: 'teacher-mzi',
-				roomId: 'room-nb-505',
-				timeSlotId: 'day-Monday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// MONDAY - Batch 20B
-			{
-				id: 'entry-mon-20b-1',
+				id: 'entry-mon-20b-slot0',
 				courseId: 'course-cse-4206',
 				teacherId: 'teacher-rrp',
 				roomId: 'room-nb-408',
-				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				timeSlotId: 'day-Monday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '20B'
 			},
 			
-			// TUESDAY - Batch 27B
+			// MONDAY 11:10-12:40 - Multiple batches
 			{
-				id: 'entry-tue-27b-1',
+				id: 'entry-mon-27b-slot1',
+				courseId: 'course-eng-1101',
+				teacherId: 'teacher-aam',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Monday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '27B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
+			},
+			{
+				id: 'entry-mon-26b-slot1',
+				courseId: 'course-mth-1201',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Monday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '26B'
+			},
+			{
+				id: 'entry-mon-25b-slot1',
+				courseId: 'course-bus-2201',
+				teacherId: 'teacher-ejs',
+				roomId: 'room-nb-702',
+				timeSlotId: 'day-Monday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '25B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE (with 24B)'
+			},
+			{
+				id: 'entry-mon-22b-slot1',
+				courseId: 'course-cse-3206',
+				teacherId: 'teacher-mzi',
+				roomId: 'room-nb-505',
+				timeSlotId: 'day-Monday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '22B'
+			},
+			
+			// TUESDAY 9:30-11:00 - Multiple batches
+			{
+				id: 'entry-tue-27b-slot0',
 				courseId: 'course-eee-1101',
 				teacherId: 'teacher-ric',
 				roomId: 'room-nb-508',
-				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				timeSlotId: 'day-Tuesday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '27B'
 			},
 			{
-				id: 'entry-tue-27b-2',
-				courseId: 'course-cse-3207',
-				teacherId: 'teacher-sr',
-				roomId: 'room-nb-501',
-				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// TUESDAY - Batch 26B
-			{
-				id: 'entry-tue-26b-1',
+				id: 'entry-tue-26b-slot0',
 				courseId: 'course-phy-1201',
 				teacherId: 'teacher-mra',
 				roomId: 'room-nb-503',
-				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				timeSlotId: 'day-Tuesday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '26B',
+				isShared: true,
+				sharedWith: 'CSE+EEE+CE'
 			},
-			
-			// TUESDAY - Batch 22B
 			{
-				id: 'entry-tue-22b-1',
+				id: 'entry-tue-22b-slot0',
 				courseId: 'course-cse-3201',
 				teacherId: 'teacher-nh',
 				roomId: 'room-nb-506',
-				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				timeSlotId: 'day-Tuesday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '22B'
 			},
 			{
-				id: 'entry-tue-22b-2',
-				courseId: 'course-cse-3204',
-				teacherId: 'teacher-mm',
-				roomId: 'room-nb-407',
-				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// TUESDAY - Batch 21B
-			{
-				id: 'entry-tue-21b-1',
+				id: 'entry-tue-21b-slot0',
 				courseId: 'course-cse-4205',
 				teacherId: 'teacher-rrp',
 				roomId: 'room-nb-502',
-				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				timeSlotId: 'day-Tuesday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '21B'
 			},
 			{
-				id: 'entry-tue-21b-2',
-				courseId: 'course-cse-4103',
-				teacherId: 'teacher-itm',
-				roomId: 'room-nb-503',
-				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
-				departmentId: 'dept-cse',
-				semester: 'Summer-2025',
-				academicYear: '2025'
-			},
-			
-			// TUESDAY - Batch 20B
-			{
-				id: 'entry-tue-20b-1',
+				id: 'entry-tue-20b-slot0',
 				courseId: 'course-cse-483',
 				teacherId: 'teacher-itm',
 				roomId: 'room-nb-504',
-				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				timeSlotId: 'day-Tuesday-0',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '20B'
+			},
+			
+			// TUESDAY 11:10-12:40 - Multiple batches
+			{
+				id: 'entry-tue-27b-slot1',
+				courseId: 'course-cse-3207',
+				teacherId: 'teacher-sr',
+				roomId: 'room-nb-501',
+				timeSlotId: 'day-Tuesday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '27B'
 			},
 			{
-				id: 'entry-tue-20b-2',
+				id: 'entry-tue-22b-slot1',
+				courseId: 'course-cse-3204',
+				teacherId: 'teacher-mm',
+				roomId: 'room-nb-407',
+				timeSlotId: 'day-Tuesday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '22B'
+			},
+			{
+				id: 'entry-tue-21b-slot1',
+				courseId: 'course-cse-4103',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-503',
+				timeSlotId: 'day-Tuesday-1',
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025',
+				batch: '21B'
+			},
+			{
+				id: 'entry-tue-20b-slot1',
 				courseId: 'course-cse-453',
 				teacherId: 'teacher-fsf',
 				roomId: 'room-nb-505',
-				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
+				timeSlotId: 'day-Tuesday-1',
 				departmentId: 'dept-cse',
 				semester: 'Summer-2025',
-				academicYear: '2025'
+				academicYear: '2025',
+				batch: '20B'
 			}
 		]);
 
@@ -730,6 +766,7 @@
 						{#if entry}
 							<div 
 								class="schedule-entry"
+								class:shared={entry.isShared}
 								draggable="true"
 								ondragstart={(e) => handleDragStart(e, entry)}
 								role="button"
@@ -739,6 +776,12 @@
 								<div class="course-name">{entry.course.name}</div>
 								<div class="teacher-name">{entry.teacher.name}</div>
 								<div class="room-name">📍 {entry.room.name}</div>
+								{#if entry.batch}
+									<div class="batch-info">Batch: {entry.batch}</div>
+								{/if}
+								{#if entry.isShared}
+									<div class="shared-info">🔗 {entry.sharedWith}</div>
+								{/if}
 							</div>
 						{/if}
 					</div>
@@ -909,6 +952,29 @@
 	.room-name {
 		font-size: 0.8rem;
 		opacity: 0.9;
+	}
+
+	.batch-info {
+		font-size: 0.75rem;
+		opacity: 0.85;
+		font-style: italic;
+		margin-top: 0.25rem;
+		padding-top: 0.25rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+	}
+
+	.shared-info {
+		font-size: 0.75rem;
+		opacity: 0.9;
+		background: rgba(255, 255, 255, 0.2);
+		padding: 0.25rem 0.5rem;
+		border-radius: 3px;
+		margin-top: 0.25rem;
+	}
+
+	.schedule-entry.shared {
+		background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+		border: 2px solid rgba(255, 255, 255, 0.5);
 	}
 
 	.legend {

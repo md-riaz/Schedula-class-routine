@@ -62,6 +62,9 @@ export interface ScheduleEntry {
 	departmentId: string;
 	semester: string;
 	academicYear: string;
+	batch?: string; // e.g., "27B", "26B", etc.
+	isShared?: boolean; // Indicates if this is a merged class serving multiple batches/departments
+	sharedWith?: string; // e.g., "CSE+EEE+CE" or "Multiple Batches"
 }
 
 export interface Conflict {
