@@ -1,8 +1,6 @@
 <script lang="ts">
         import { onMount } from 'svelte';
-        import html2canvas from 'html2canvas';
-        import jsPDF from 'jspdf';
-        import type { DayOfWeek, TimeSlot } from '$lib/types';
+        import type { DayOfWeek, ScheduleEntryPopulated, TimeSlot } from '$lib/types';
         import {
                 departments,
                 teachers,
@@ -18,6 +16,13 @@
                 filteredTimeSlots
         } from '$lib/stores';
         import { generateTimeSlots } from '$lib/utils/scheduler';
+        import {
+                seedCourses,
+                seedDepartments,
+                seedRooms,
+                seedScheduleEntries,
+                seedTeachers
+        } from '$lib/data/seed';
         import Card from '$lib/components/ui/card.svelte';
         import CardHeader from '$lib/components/ui/card-header.svelte';
         import CardTitle from '$lib/components/ui/card-title.svelte';
@@ -56,6 +61,22 @@
         let teacherTableEl: HTMLDivElement | null = null;
         let draggedEntry: any = null;
 
+        let entriesMap: Map<string, ScheduleEntryPopulated> = new Map();
+        let html2canvasLib: typeof import('html2canvas')['default'] | null = null;
+        let jsPDFLib: typeof import('jspdf')['default'] | null = null;
+
+        async function ensurePdfLibraries() {
+                if (html2canvasLib && jsPDFLib) return;
+
+                const [{ default: html2canvasModule }, { default: jsPDFModule }] = await Promise.all([
+                        import('html2canvas'),
+                        import('jspdf')
+                ]);
+
+                html2canvasLib = html2canvasModule;
+                jsPDFLib = jsPDFModule;
+        }
+
         function refreshTimeSlots() {
                 const daySlots = generateTimeSlots('day', {
                         durationMinutes: Number(slotDurations.day),
@@ -76,12 +97,19 @@
 
         async function exportElementToPdf(element: HTMLElement | null, filename: string) {
                 if (!element) return;
+
+                await ensurePdfLibraries();
+                const html2canvas = html2canvasLib;
+                const jsPDFConstructor = jsPDFLib;
+
+                if (!html2canvas || !jsPDFConstructor) return;
+
                 const canvas = await html2canvas(element, {
                         scale: 2,
                         backgroundColor: '#ffffff'
                 });
                 const image = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('landscape', 'mm', 'a4');
+                const pdf = new jsPDFConstructor('landscape', 'mm', 'a4');
                 const pageWidth = pdf.internal.pageSize.getWidth();
                 const pageHeight = pdf.internal.pageSize.getHeight();
                 const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
@@ -115,6 +143,7 @@
 
         function handleDrop(event: DragEvent, timeSlotId: string) {
                 event.preventDefault();
+                if (!timeSlotId) return;
                 if (draggedEntry) {
                         scheduleEntries.update(entries =>
                                 entries.map(entry =>
@@ -132,9 +161,16 @@
                 }
         }
 
+        $: entriesMap = new Map(
+                $populatedScheduleEntries.map(entry => [
+                        `${entry.timeSlot.day}-${entry.timeSlot.startTime}-${entry.timeSlot.endTime}`,
+                        entry
+                ])
+        );
+
         $: days = Array.from(
                 new Set($populatedScheduleEntries.map(entry => entry.timeSlot.day))
-        ) as DayOfWeek[];
+        ).sort((a, b) => DAY_ORDER[a] - DAY_ORDER[b]) as DayOfWeek[];
 
         $: timeRanges = Array.from(
                 new Set(
@@ -142,17 +178,14 @@
                                 entry => `${entry.timeSlot.startTime}-${entry.timeSlot.endTime}`
                         )
                 )
-        );
+        ).sort((a, b) => a.localeCompare(b));
 
         function getEntryForSlot(day: DayOfWeek, timeRange: string) {
-                return $populatedScheduleEntries.find(entry =>
-                        entry.timeSlot.day === day &&
-                        `${entry.timeSlot.startTime}-${entry.timeSlot.endTime}` === timeRange
-                );
+                return entriesMap.get(`${day}-${timeRange}`);
         }
 
         function getTimeSlotIdForCell(day: DayOfWeek, timeRange: string): string {
-                const populatedEntry = getEntryForSlot(day, timeRange);
+                const populatedEntry = entriesMap.get(`${day}-${timeRange}`);
                 if (populatedEntry) return populatedEntry.timeSlot.id;
 
                 const allTimeSlots: TimeSlot[] = $filteredTimeSlots;
@@ -188,7 +221,7 @@
         }
 
         function normalizeDuration(value: number) {
-                return Number.isFinite(value) && value >= 15 ? value : 15;
+                return Number.isFinite(value) && value >= 30 ? value : 30;
         }
 
         function handleDurationChange() {
@@ -208,125 +241,16 @@
                         role: 'admin'
                 });
 
-                departments.set([
-                        { id: 'dept-cse', name: 'Computer Science & Engineering', code: 'CSE' },
-                        { id: 'dept-eee', name: 'Electrical & Electronic Engineering', code: 'EEE' },
-                        { id: 'dept-ce', name: 'Civil Engineering', code: 'CE' }
-                ]);
+                departments.set(seedDepartments);
+                teachers.set(seedTeachers);
+                rooms.set(seedRooms);
+                courses.set(seedCourses);
 
-                teachers.set([
-                        { id: 'teacher-ric', name: 'RIC', email: 'ric@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
-                        { id: 'teacher-mj', name: 'MJ', email: 'mj@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-nh', name: 'NH', email: 'nh@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-sr', name: 'SR', email: 'sr@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-ejs', name: 'EJS', email: 'ejs@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-amar', name: 'AMAR', email: 'amar@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-jh', name: 'JH', email: 'jh@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-uhl', name: 'UHL', email: 'uhl@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-mrk', name: 'MRK', email: 'mrk@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-rrp', name: 'RRP', email: 'rrp@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-mbi', name: 'MBI', email: 'mbi@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-mri', name: 'MRI', email: 'mri@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
-                        { id: 'teacher-rh', name: 'RH', email: 'rh@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
-                        { id: 'teacher-itm', name: 'ITM', email: 'itm@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-mzi', name: 'MZI', email: 'mzi@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-aam', name: 'AAM', email: 'aam@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-mra', name: 'MRA', email: 'mra@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
-                        { id: 'teacher-mm', name: 'MM', email: 'mm@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
-                        { id: 'teacher-fsf', name: 'FSF', email: 'fsf@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] }
-                ]);
-
-                rooms.set([
-                        { id: 'room-nb-508', name: 'NB-508', capacity: 50, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-504', name: 'NB-504', capacity: 60, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-408', name: 'NB-408', capacity: 45, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-703', name: 'NB-703', capacity: 70, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-503', name: 'NB-503', capacity: 50, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-502', name: 'NB-502', capacity: 50, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-406', name: 'NB-406', capacity: 45, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-407', name: 'NB-407', capacity: 45, building: 'New Building', type: 'lab' },
-                        { id: 'room-nb-501', name: 'NB-501', capacity: 50, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-702', name: 'NB-702', capacity: 70, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-608', name: 'NB-608', capacity: 60, building: 'New Building', type: 'lab' },
-                        { id: 'room-nb-505', name: 'NB-505', capacity: 50, building: 'New Building', type: 'lecture' },
-                        { id: 'room-nb-506', name: 'NB-506', capacity: 50, building: 'New Building', type: 'lecture' }
-                ]);
-
-                courses.set([
-                        { id: 'course-eee-1101', name: 'Basic Electrical Engineering', code: 'EEE-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-mat-1101', name: 'Mathematics I', code: 'MAT-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-phy-1101', name: 'Physics I', code: 'PHY-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-eee-1102', name: 'Basic Electrical Engineering Lab', code: 'EEE-1102', departmentId: 'dept-cse', credits: 1, type: 'lab' },
-                        { id: 'course-eng-1101', name: 'English I', code: 'ENG-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-mth-1201', name: 'Mathematics II', code: 'MTH-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-1203', name: 'Structured Programming', code: 'CSE-1203', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-eee-1201', name: 'Electrical Circuits', code: 'EEE-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-phy-1201', name: 'Physics II', code: 'PHY-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-1204', name: 'Structured Programming Lab', code: 'CSE-1204', departmentId: 'dept-cse', credits: 1, type: 'lab' },
-                        { id: 'course-cse-2105', name: 'Data Structures', code: 'CSE-2105', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-bus-2201', name: 'Business Studies', code: 'BUS-2201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-mth-2101', name: 'Discrete Mathematics', code: 'MTH-2101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-2203', name: 'Object Oriented Programming', code: 'CSE-2203', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-lamp-3201', name: 'LAMP Programming', code: 'LAMP-3201', departmentId: 'dept-cse', credits: 3, type: 'practical' },
-                        { id: 'course-bus-3101', name: 'Business Communication', code: 'BUS-3101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-4103', name: 'Software Engineering', code: 'CSE-4103', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3100', name: 'Algorithm Design', code: 'CSE-3100', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3103', name: 'Database Systems', code: 'CSE-3103', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3201', name: 'Computer Architecture', code: 'CSE-3201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3205', name: 'Operating Systems', code: 'CSE-3205', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3204', name: 'Computer Networks', code: 'CSE-3204', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3206', name: 'Operating Systems Lab', code: 'CSE-3206', departmentId: 'dept-cse', credits: 1, type: 'lab' },
-                        { id: 'course-cse-4201', name: 'Compiler Design', code: 'CSE-4201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3200', name: 'Microprocessor & Assembly Language', code: 'CSE-3200', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-4104', name: 'Software Engineering Lab', code: 'CSE-4104', departmentId: 'dept-cse', credits: 1, type: 'lab' },
-                        { id: 'course-cse-4205', name: 'Artificial Intelligence', code: 'CSE-4205', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-4206', name: 'Machine Learning', code: 'CSE-4206', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-3207', name: 'Web Technologies', code: 'CSE-3207', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-483', name: 'Cloud Computing', code: 'CSE-483', departmentId: 'dept-cse', credits: 3, type: 'theory' },
-                        { id: 'course-cse-453', name: 'Cyber Security', code: 'CSE-453', departmentId: 'dept-cse', credits: 3, type: 'theory' }
-                ]);
-
-                scheduleEntries.set([
-                        { id: 'entry-sat-27b-slot0', courseId: 'course-eee-1101', teacherId: 'teacher-ric', roomId: 'room-nb-508', timeSlotId: 'day-Saturday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B' },
-                        { id: 'entry-sat-26b-slot0', courseId: 'course-mth-1201', teacherId: 'teacher-mj', roomId: 'room-nb-504', timeSlotId: 'day-Saturday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '26B' },
-                        { id: 'entry-sat-23b-slot0', courseId: 'course-cse-2203', teacherId: 'teacher-amar', roomId: 'room-nb-503', timeSlotId: 'day-Saturday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '23B' },
-                        { id: 'entry-sat-22b-slot0', courseId: 'course-cse-3100', teacherId: 'teacher-sr', roomId: 'room-nb-406', timeSlotId: 'day-Saturday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-sat-21b-slot0', courseId: 'course-cse-4201', teacherId: 'teacher-rrp', roomId: 'room-nb-408', timeSlotId: 'day-Saturday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-sat-27b-slot1', courseId: 'course-mat-1101', teacherId: 'teacher-mj', roomId: 'room-nb-504', timeSlotId: 'day-Saturday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B', isShared: true, sharedWith: 'CSE+EEE+CE' },
-                        { id: 'entry-sat-26b-slot1', courseId: 'course-cse-1203', teacherId: 'teacher-nh', roomId: 'room-nb-408', timeSlotId: 'day-Saturday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '26B' },
-                        { id: 'entry-sat-25b-slot1', courseId: 'course-cse-2105', teacherId: 'teacher-sr', roomId: 'room-nb-508', timeSlotId: 'day-Saturday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '25B' },
-                        { id: 'entry-sat-22b-slot1', courseId: 'course-cse-3103', teacherId: 'teacher-mrk', roomId: 'room-nb-502', timeSlotId: 'day-Saturday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-sat-25b-slot2', courseId: 'course-bus-2201', teacherId: 'teacher-ejs', roomId: 'room-nb-703', timeSlotId: 'day-Saturday-2', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '25B', isShared: true, sharedWith: 'CSE+EEE+CE (with 24B)' },
-                        { id: 'entry-sat-23b-slot2', courseId: 'course-lamp-3201', teacherId: 'teacher-jh', roomId: 'room-nb-508', timeSlotId: 'day-Saturday-2', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '23B' },
-                        { id: 'entry-sat-21b-slot2', courseId: 'course-cse-3200', teacherId: 'teacher-mbi', roomId: 'room-nb-407', timeSlotId: 'day-Saturday-2', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-sat-23b-slot3', courseId: 'course-bus-3101', teacherId: 'teacher-uhl', roomId: 'room-nb-703', timeSlotId: 'day-Saturday-3', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '23B', isShared: true, sharedWith: 'CSE+EEE+CE' },
-                        { id: 'entry-sun-27b-slot0', courseId: 'course-phy-1101', teacherId: 'teacher-mri', roomId: 'room-nb-508', timeSlotId: 'day-Sunday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B', isShared: true, sharedWith: 'CSE+EEE+CE' },
-                        { id: 'entry-sun-26b-slot0', courseId: 'course-eee-1201', teacherId: 'teacher-rh', roomId: 'room-nb-702', timeSlotId: 'day-Sunday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '26B', isShared: true, sharedWith: 'CSE+EEE' },
-                        { id: 'entry-sun-23b-slot0', courseId: 'course-cse-4103', teacherId: 'teacher-mrk', roomId: 'room-nb-407', timeSlotId: 'day-Sunday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '23B' },
-                        { id: 'entry-sun-22b-slot0', courseId: 'course-cse-4201', teacherId: 'teacher-rrp', roomId: 'room-nb-501', timeSlotId: 'day-Sunday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-sun-21b-slot0', courseId: 'course-cse-4103', teacherId: 'teacher-itm', roomId: 'room-nb-502', timeSlotId: 'day-Sunday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-sun-25b-slot1', courseId: 'course-cse-1204', teacherId: 'teacher-nh', roomId: 'room-nb-408', timeSlotId: 'day-Sunday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '25B' },
-                        { id: 'entry-sun-22b-slot1', courseId: 'course-cse-3205', teacherId: 'teacher-mbi', roomId: 'room-nb-501', timeSlotId: 'day-Sunday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-sun-21b-slot2', courseId: 'course-cse-4104', teacherId: 'teacher-itm', roomId: 'room-nb-408', timeSlotId: 'day-Sunday-2', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-mon-27b-slot0', courseId: 'course-eee-1102', teacherId: 'teacher-ric', roomId: 'room-nb-608', timeSlotId: 'day-Monday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B' },
-                        { id: 'entry-mon-26b-slot0', courseId: 'course-phy-1201', teacherId: 'teacher-mra', roomId: 'room-nb-508', timeSlotId: 'day-Monday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '26B', isShared: true, sharedWith: 'CSE+EEE+CE' },
-                        { id: 'entry-mon-25b-slot0', courseId: 'course-mth-2101', teacherId: 'teacher-mj', roomId: 'room-nb-504', timeSlotId: 'day-Monday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '25B' },
-                        { id: 'entry-mon-22b-slot1', courseId: 'course-cse-3206', teacherId: 'teacher-mzi', roomId: 'room-nb-505', timeSlotId: 'day-Monday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-tue-27b-slot0', courseId: 'course-eee-1101', teacherId: 'teacher-ric', roomId: 'room-nb-508', timeSlotId: 'day-Tuesday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B' },
-                        { id: 'entry-tue-26b-slot0', courseId: 'course-phy-1201', teacherId: 'teacher-mra', roomId: 'room-nb-503', timeSlotId: 'day-Tuesday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '26B', isShared: true, sharedWith: 'CSE+EEE+CE' },
-                        { id: 'entry-tue-22b-slot0', courseId: 'course-cse-3201', teacherId: 'teacher-nh', roomId: 'room-nb-506', timeSlotId: 'day-Tuesday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-tue-21b-slot0', courseId: 'course-cse-4205', teacherId: 'teacher-rrp', roomId: 'room-nb-502', timeSlotId: 'day-Tuesday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-tue-20b-slot0', courseId: 'course-cse-483', teacherId: 'teacher-itm', roomId: 'room-nb-504', timeSlotId: 'day-Tuesday-0', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '20B' },
-                        { id: 'entry-tue-27b-slot1', courseId: 'course-cse-3207', teacherId: 'teacher-sr', roomId: 'room-nb-501', timeSlotId: 'day-Tuesday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '27B' },
-                        { id: 'entry-tue-22b-slot1', courseId: 'course-cse-3204', teacherId: 'teacher-mm', roomId: 'room-nb-407', timeSlotId: 'day-Tuesday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '22B' },
-                        { id: 'entry-tue-21b-slot1', courseId: 'course-cse-4103', teacherId: 'teacher-itm', roomId: 'room-nb-503', timeSlotId: 'day-Tuesday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '21B' },
-                        { id: 'entry-tue-20b-slot1', courseId: 'course-cse-453', teacherId: 'teacher-fsf', roomId: 'room-nb-505', timeSlotId: 'day-Tuesday-1', departmentId: 'dept-cse', semester: 'Summer-2025', academicYear: '2025', batch: '20B' }
-                ]);
+                refreshTimeSlots();
+                scheduleEntries.set(seedScheduleEntries);
 
                 selectedDepartmentId.set('dept-cse');
                 selectedShift.set('day');
-
-                refreshTimeSlots();
         });
 </script>
 
@@ -377,7 +301,7 @@
                                                                 min="30"
                                                                 step="5"
                                                                 bind:value={slotDurations.day}
-                                                                on:change={handleDurationChange}
+                                                                on:input={handleDurationChange}
                                                         />
                                                 </div>
                                                 <div class="space-y-2">
@@ -388,7 +312,7 @@
                                                                 min="30"
                                                                 step="5"
                                                                 bind:value={slotDurations.evening}
-                                                                on:change={handleDurationChange}
+                                                                on:input={handleDurationChange}
                                                         />
                                                 </div>
                                                 <div class="space-y-2">
@@ -399,7 +323,7 @@
                                                                 min="30"
                                                                 step="5"
                                                                 bind:value={slotDurations.weekend}
-                                                                on:change={handleDurationChange}
+                                                                on:input={handleDurationChange}
                                                         />
                                                 </div>
                                         </div>
