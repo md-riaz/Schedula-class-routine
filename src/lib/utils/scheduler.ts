@@ -12,56 +12,58 @@ import { canAddEntry } from './validation';
 /**
  * Generate time slots for different shifts
  */
-export function generateTimeSlots(shift: Shift): TimeSlot[] {
-	const slots: TimeSlot[] = [];
-	const days: DayOfWeek[] = shift === 'weekend' 
-		? ['Friday', 'Saturday'] 
-		: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+type TimeSlotOptions = {
+        durationMinutes?: number;
+        startTimes?: string[];
+        days?: DayOfWeek[];
+};
 
-	let timeRanges: { start: string; end: string; duration: number }[] = [];
+const DEFAULT_START_TIMES: Record<Shift, string[]> = {
+        day: ['08:00', '09:30', '11:00', '12:30', '14:00', '15:30'],
+        evening: ['17:00', '18:30', '20:00'],
+        weekend: ['09:00', '10:30', '12:00', '14:30', '16:00']
+};
 
-	switch (shift) {
-		case 'day':
-			timeRanges = [
-				{ start: '08:00', end: '09:30', duration: 90 },
-				{ start: '09:30', end: '11:00', duration: 90 },
-				{ start: '11:00', end: '12:30', duration: 90 },
-				{ start: '12:30', end: '14:00', duration: 90 },
-				{ start: '14:00', end: '15:30', duration: 90 },
-				{ start: '15:30', end: '17:00', duration: 90 }
-			];
-			break;
-		case 'evening':
-			timeRanges = [
-				{ start: '17:00', end: '18:30', duration: 90 },
-				{ start: '18:30', end: '20:00', duration: 90 },
-				{ start: '20:00', end: '21:30', duration: 90 }
-			];
-			break;
-		case 'weekend':
-			timeRanges = [
-				{ start: '09:00', end: '10:30', duration: 90 },
-				{ start: '10:30', end: '12:00', duration: 90 },
-				{ start: '12:00', end: '13:30', duration: 90 },
-				{ start: '14:30', end: '16:00', duration: 90 },
-				{ start: '16:00', end: '17:30', duration: 90 }
-			];
-			break;
-	}
+const DEFAULT_DAYS: Record<Shift, DayOfWeek[]> = {
+        day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        evening: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        weekend: ['Friday', 'Saturday']
+};
 
-	days.forEach(day => {
-		timeRanges.forEach((range, index) => {
-			slots.push({
-				id: `${shift}-${day}-${index}`,
-				day,
-				startTime: range.start,
-				endTime: range.end,
-				shift
-			});
-		});
-	});
+const DEFAULT_DURATION: Record<Shift, number> = {
+        day: 90,
+        evening: 90,
+        weekend: 90
+};
 
-	return slots;
+function addMinutes(time: string, minutes: number): string {
+        const [hour, minute] = time.split(':').map(Number);
+        const totalMinutes = hour * 60 + minute + minutes;
+        const newHours = Math.floor(totalMinutes / 60) % 24;
+        const newMinutes = totalMinutes % 60;
+        return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+}
+
+export function generateTimeSlots(shift: Shift, options: TimeSlotOptions = {}): TimeSlot[] {
+        const slots: TimeSlot[] = [];
+        const startTimes = options.startTimes ?? DEFAULT_START_TIMES[shift];
+        const days = options.days ?? DEFAULT_DAYS[shift];
+        const duration = options.durationMinutes ?? DEFAULT_DURATION[shift];
+
+        days.forEach(day => {
+                startTimes.forEach((startTime, index) => {
+                        const endTime = addMinutes(startTime, duration);
+                        slots.push({
+                                id: `${shift}-${day}-${index}`,
+                                day,
+                                startTime,
+                                endTime,
+                                shift
+                        });
+                });
+        });
+
+        return slots;
 }
 
 /**
