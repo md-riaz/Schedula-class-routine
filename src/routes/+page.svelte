@@ -23,83 +23,586 @@
 		currentUser.set({
 			id: 'user-1',
 			name: 'Admin User',
-			email: 'admin@university.edu',
+			email: 'admin@pust.edu',
 			role: 'admin'
 		});
 
-		// Initialize departments
+		// Initialize departments - Pundra University of Science & Technology
 		departments.set([
-			{ id: 'dept-1', name: 'Computer Science', code: 'CSE' },
-			{ id: 'dept-2', name: 'Electrical Engineering', code: 'EEE' },
-			{ id: 'dept-3', name: 'Business Administration', code: 'BBA' }
+			{ id: 'dept-cse', name: 'Computer Science & Engineering', code: 'CSE' },
+			{ id: 'dept-eee', name: 'Electrical & Electronic Engineering', code: 'EEE' },
+			{ id: 'dept-ce', name: 'Civil Engineering', code: 'CE' }
 		]);
 
-		// Initialize teachers
+		// Initialize teachers based on the routine (using their initials)
 		teachers.set([
-			{ id: 'teacher-1', name: 'Dr. John Smith', email: 'john@university.edu', departmentId: 'dept-1', availableShifts: ['day', 'evening'] },
-			{ id: 'teacher-2', name: 'Prof. Sarah Johnson', email: 'sarah@university.edu', departmentId: 'dept-1', availableShifts: ['day'] },
-			{ id: 'teacher-3', name: 'Dr. Michael Brown', email: 'michael@university.edu', departmentId: 'dept-2', availableShifts: ['evening', 'weekend'] },
-			{ id: 'teacher-4', name: 'Dr. Emily Davis', email: 'emily@university.edu', departmentId: 'dept-3', availableShifts: ['day', 'weekend'] }
+			{ id: 'teacher-ric', name: 'RIC', email: 'ric@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
+			{ id: 'teacher-mj', name: 'MJ', email: 'mj@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-nh', name: 'NH', email: 'nh@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-sr', name: 'SR', email: 'sr@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-ejs', name: 'EJS', email: 'ejs@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-amar', name: 'AMAR', email: 'amar@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-jh', name: 'JH', email: 'jh@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-uhl', name: 'UHL', email: 'uhl@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-mrk', name: 'MRK', email: 'mrk@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-rrp', name: 'RRP', email: 'rrp@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-mbi', name: 'MBI', email: 'mbi@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-mri', name: 'MRI', email: 'mri@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
+			{ id: 'teacher-rh', name: 'RH', email: 'rh@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
+			{ id: 'teacher-itm', name: 'ITM', email: 'itm@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-mzi', name: 'MZI', email: 'mzi@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-aam', name: 'AAM', email: 'aam@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-mra', name: 'MRA', email: 'mra@pust.edu', departmentId: 'dept-eee', availableShifts: ['day'] },
+			{ id: 'teacher-mm', name: 'MM', email: 'mm@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] },
+			{ id: 'teacher-fsf', name: 'FSF', email: 'fsf@pust.edu', departmentId: 'dept-cse', availableShifts: ['day'] }
 		]);
 
-		// Initialize rooms
+		// Initialize rooms - New Building (NB) format
 		rooms.set([
-			{ id: 'room-1', name: 'Room 101', capacity: 40, building: 'Building A', type: 'lecture' },
-			{ id: 'room-2', name: 'Room 102', capacity: 50, building: 'Building A', type: 'lecture' },
-			{ id: 'room-3', name: 'Lab 201', capacity: 30, building: 'Building B', type: 'lab' },
-			{ id: 'room-4', name: 'Seminar Hall', capacity: 100, building: 'Building C', type: 'seminar' }
+			{ id: 'room-nb-508', name: 'NB-508', capacity: 50, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-504', name: 'NB-504', capacity: 60, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-408', name: 'NB-408', capacity: 45, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-703', name: 'NB-703', capacity: 70, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-503', name: 'NB-503', capacity: 50, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-502', name: 'NB-502', capacity: 50, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-406', name: 'NB-406', capacity: 45, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-407', name: 'NB-407', capacity: 45, building: 'New Building', type: 'lab' },
+			{ id: 'room-nb-501', name: 'NB-501', capacity: 50, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-702', name: 'NB-702', capacity: 70, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-608', name: 'NB-608', capacity: 60, building: 'New Building', type: 'lab' },
+			{ id: 'room-nb-505', name: 'NB-505', capacity: 50, building: 'New Building', type: 'lecture' },
+			{ id: 'room-nb-506', name: 'NB-506', capacity: 50, building: 'New Building', type: 'lecture' }
 		]);
 
-		// Initialize courses
+		// Initialize courses from the Pundra University routine
 		courses.set([
-			{ id: 'course-1', name: 'Data Structures', code: 'CSE201', departmentId: 'dept-1', credits: 3, type: 'theory' },
-			{ id: 'course-2', name: 'Database Lab', code: 'CSE202', departmentId: 'dept-1', credits: 1, type: 'lab' },
-			{ id: 'course-3', name: 'Algorithm Design', code: 'CSE301', departmentId: 'dept-1', credits: 3, type: 'theory' },
-			{ id: 'course-4', name: 'Digital Logic', code: 'EEE101', departmentId: 'dept-2', credits: 3, type: 'theory' },
-			{ id: 'course-5', name: 'Management Principles', code: 'BBA101', departmentId: 'dept-3', credits: 3, type: 'theory' }
+			// Batch 27B courses
+			{ id: 'course-eee-1101', name: 'Basic Electrical Engineering', code: 'EEE-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-mat-1101', name: 'Mathematics I', code: 'MAT-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-phy-1101', name: 'Physics I', code: 'PHY-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-eee-1102', name: 'Basic Electrical Engineering Lab', code: 'EEE-1102', departmentId: 'dept-cse', credits: 1, type: 'lab' },
+			{ id: 'course-eng-1101', name: 'English I', code: 'ENG-1101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			
+			// Batch 26B courses
+			{ id: 'course-mth-1201', name: 'Mathematics II', code: 'MTH-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-1203', name: 'Structured Programming', code: 'CSE-1203', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-eee-1201', name: 'Electrical Circuits', code: 'EEE-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-phy-1201', name: 'Physics II', code: 'PHY-1201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-1204', name: 'Structured Programming Lab', code: 'CSE-1204', departmentId: 'dept-cse', credits: 1, type: 'lab' },
+			
+			// Batch 25B courses
+			{ id: 'course-cse-2105', name: 'Data Structures', code: 'CSE-2105', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-bus-2201', name: 'Business Studies', code: 'BUS-2201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-mth-2101', name: 'Discrete Mathematics', code: 'MTH-2101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			
+			// Batch 24B courses - no new courses needed from above
+			
+			// Batch 23B courses
+			{ id: 'course-cse-2203', name: 'Object Oriented Programming', code: 'CSE-2203', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-lamp-3201', name: 'LAMP Programming', code: 'LAMP-3201', departmentId: 'dept-cse', credits: 3, type: 'practical' },
+			{ id: 'course-bus-3101', name: 'Business Communication', code: 'BUS-3101', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-4103', name: 'Software Engineering', code: 'CSE-4103', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			
+			// Batch 22B courses
+			{ id: 'course-cse-3100', name: 'Algorithm Design', code: 'CSE-3100', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3103', name: 'Database Systems', code: 'CSE-3103', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3201', name: 'Computer Architecture', code: 'CSE-3201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3205', name: 'Operating Systems', code: 'CSE-3205', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3204', name: 'Computer Networks', code: 'CSE-3204', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3206', name: 'Operating Systems Lab', code: 'CSE-3206', departmentId: 'dept-cse', credits: 1, type: 'lab' },
+			
+			// Batch 21B courses
+			{ id: 'course-cse-4201', name: 'Compiler Design', code: 'CSE-4201', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3200', name: 'Microprocessor & Assembly Language', code: 'CSE-3200', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-4104', name: 'Software Engineering Lab', code: 'CSE-4104', departmentId: 'dept-cse', credits: 1, type: 'lab' },
+			{ id: 'course-cse-4205', name: 'Artificial Intelligence', code: 'CSE-4205', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			
+			// Batch 20B courses
+			{ id: 'course-cse-4206', name: 'Machine Learning', code: 'CSE-4206', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-3207', name: 'Web Technologies', code: 'CSE-3207', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-483', name: 'Cloud Computing', code: 'CSE-483', departmentId: 'dept-cse', credits: 3, type: 'theory' },
+			{ id: 'course-cse-453', name: 'Cyber Security', code: 'CSE-453', departmentId: 'dept-cse', credits: 3, type: 'theory' }
 		]);
 
-		// Generate time slots for all shifts
-		const daySlots = generateTimeSlots('day');
+		// Generate time slots for all shifts with times matching Pundra University
+		// Day shift time slots matching the routine
+		const daySlots: TimeSlot[] = [];
+		const days: DayOfWeek[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+		
+		// Time slots for day shift based on the routine
+		const dayTimeRanges = [
+			{ start: '09:30', end: '11:00' },
+			{ start: '11:10', end: '12:40' },
+			{ start: '14:00', end: '15:30' },
+			{ start: '15:30', end: '17:00' }
+		];
+
+		days.forEach(day => {
+			dayTimeRanges.forEach((range, index) => {
+				daySlots.push({
+					id: `day-${day}-${index}`,
+					day,
+					startTime: range.start,
+					endTime: range.end,
+					shift: 'day'
+				});
+			});
+		});
+
 		const eveningSlots = generateTimeSlots('evening');
 		const weekendSlots = generateTimeSlots('weekend');
 		timeSlots.set([...daySlots, ...eveningSlots, ...weekendSlots]);
 
-		// Initialize some sample schedule entries
+		// Initialize schedule entries based on Pundra University routine (Saturday schedule for HSC batches)
 		scheduleEntries.set([
+			// SATURDAY - Batch 27B
 			{
-				id: 'entry-1',
-				courseId: 'course-1',
-				teacherId: 'teacher-1',
-				roomId: 'room-1',
-				timeSlotId: 'day-Sunday-0',
-				departmentId: 'dept-1',
-				semester: 'Fall 2025',
-				academicYear: '2025-2026'
+				id: 'entry-sat-27b-1',
+				courseId: 'course-eee-1101',
+				teacherId: 'teacher-ric',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
 			},
 			{
-				id: 'entry-2',
-				courseId: 'course-2',
-				teacherId: 'teacher-2',
-				roomId: 'room-3',
-				timeSlotId: 'day-Monday-1',
-				departmentId: 'dept-1',
-				semester: 'Fall 2025',
-				academicYear: '2025-2026'
+				id: 'entry-sat-27b-2',
+				courseId: 'course-mat-1101',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Saturday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SATURDAY - Batch 26B
+			{
+				id: 'entry-sat-26b-1',
+				courseId: 'course-mth-1201',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
 			},
 			{
-				id: 'entry-3',
-				courseId: 'course-3',
-				teacherId: 'teacher-1',
-				roomId: 'room-2',
-				timeSlotId: 'day-Tuesday-2',
-				departmentId: 'dept-1',
-				semester: 'Fall 2025',
-				academicYear: '2025-2026'
+				id: 'entry-sat-26b-2',
+				courseId: 'course-cse-1203',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Saturday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SATURDAY - Batch 25B
+			{
+				id: 'entry-sat-25b-1',
+				courseId: 'course-cse-2105',
+				teacherId: 'teacher-sr',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Saturday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sat-25b-2',
+				courseId: 'course-bus-2201',
+				teacherId: 'teacher-ejs',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Saturday-2', // 2:00-3:30
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SATURDAY - Batch 23B
+			{
+				id: 'entry-sat-23b-1',
+				courseId: 'course-cse-2203',
+				teacherId: 'teacher-amar',
+				roomId: 'room-nb-503',
+				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sat-23b-2',
+				courseId: 'course-lamp-3201',
+				teacherId: 'teacher-jh',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Saturday-2', // 2:00-3:30
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sat-23b-3',
+				courseId: 'course-bus-3101',
+				teacherId: 'teacher-uhl',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Saturday-3', // 3:30-5:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SATURDAY - Batch 22B
+			{
+				id: 'entry-sat-22b-1',
+				courseId: 'course-cse-3100',
+				teacherId: 'teacher-sr',
+				roomId: 'room-nb-406',
+				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sat-22b-2',
+				courseId: 'course-cse-3103',
+				teacherId: 'teacher-mrk',
+				roomId: 'room-nb-502',
+				timeSlotId: 'day-Saturday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SATURDAY - Batch 21B
+			{
+				id: 'entry-sat-21b-1',
+				courseId: 'course-cse-4201',
+				teacherId: 'teacher-rrp',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Saturday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sat-21b-2',
+				courseId: 'course-cse-3200',
+				teacherId: 'teacher-mbi',
+				roomId: 'room-nb-407',
+				timeSlotId: 'day-Saturday-2', // 2:00-3:30
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 27B
+			{
+				id: 'entry-sun-27b-1',
+				courseId: 'course-phy-1101',
+				teacherId: 'teacher-mri',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 26B
+			{
+				id: 'entry-sun-26b-1',
+				courseId: 'course-eee-1201',
+				teacherId: 'teacher-rh',
+				roomId: 'room-nb-702',
+				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 25B
+			{
+				id: 'entry-sun-25b-1',
+				courseId: 'course-cse-1204',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Sunday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 23B
+			{
+				id: 'entry-sun-23b-1',
+				courseId: 'course-cse-4103',
+				teacherId: 'teacher-mrk',
+				roomId: 'room-nb-407',
+				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 22B
+			{
+				id: 'entry-sun-22b-1',
+				courseId: 'course-cse-4201',
+				teacherId: 'teacher-rrp',
+				roomId: 'room-nb-501',
+				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sun-22b-2',
+				courseId: 'course-cse-3205',
+				teacherId: 'teacher-mbi',
+				roomId: 'room-nb-501',
+				timeSlotId: 'day-Sunday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// SUNDAY - Batch 21B
+			{
+				id: 'entry-sun-21b-1',
+				courseId: 'course-cse-4103',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-502',
+				timeSlotId: 'day-Sunday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-sun-21b-2',
+				courseId: 'course-cse-4104',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Sunday-2', // 2:00-3:30
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 27B
+			{
+				id: 'entry-mon-27b-1',
+				courseId: 'course-eee-1102',
+				teacherId: 'teacher-ric',
+				roomId: 'room-nb-608',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-mon-27b-2',
+				courseId: 'course-eng-1101',
+				teacherId: 'teacher-aam',
+				roomId: 'room-nb-703',
+				timeSlotId: 'day-Monday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 26B
+			{
+				id: 'entry-mon-26b-1',
+				courseId: 'course-phy-1201',
+				teacherId: 'teacher-mra',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-mon-26b-2',
+				courseId: 'course-mth-1201',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Monday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 25B
+			{
+				id: 'entry-mon-25b-1',
+				courseId: 'course-mth-2101',
+				teacherId: 'teacher-mj',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-mon-25b-2',
+				courseId: 'course-bus-2201',
+				teacherId: 'teacher-ejs',
+				roomId: 'room-nb-702',
+				timeSlotId: 'day-Monday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 23B
+			{
+				id: 'entry-mon-23b-1',
+				courseId: 'course-cse-3205',
+				teacherId: 'teacher-mzi',
+				roomId: 'room-nb-502',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 22B
+			{
+				id: 'entry-mon-22b-1',
+				courseId: 'course-cse-3201',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-503',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-mon-22b-2',
+				courseId: 'course-cse-3206',
+				teacherId: 'teacher-mzi',
+				roomId: 'room-nb-505',
+				timeSlotId: 'day-Monday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// MONDAY - Batch 20B
+			{
+				id: 'entry-mon-20b-1',
+				courseId: 'course-cse-4206',
+				teacherId: 'teacher-rrp',
+				roomId: 'room-nb-408',
+				timeSlotId: 'day-Monday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// TUESDAY - Batch 27B
+			{
+				id: 'entry-tue-27b-1',
+				courseId: 'course-eee-1101',
+				teacherId: 'teacher-ric',
+				roomId: 'room-nb-508',
+				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-tue-27b-2',
+				courseId: 'course-cse-3207',
+				teacherId: 'teacher-sr',
+				roomId: 'room-nb-501',
+				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// TUESDAY - Batch 26B
+			{
+				id: 'entry-tue-26b-1',
+				courseId: 'course-phy-1201',
+				teacherId: 'teacher-mra',
+				roomId: 'room-nb-503',
+				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// TUESDAY - Batch 22B
+			{
+				id: 'entry-tue-22b-1',
+				courseId: 'course-cse-3201',
+				teacherId: 'teacher-nh',
+				roomId: 'room-nb-506',
+				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-tue-22b-2',
+				courseId: 'course-cse-3204',
+				teacherId: 'teacher-mm',
+				roomId: 'room-nb-407',
+				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// TUESDAY - Batch 21B
+			{
+				id: 'entry-tue-21b-1',
+				courseId: 'course-cse-4205',
+				teacherId: 'teacher-rrp',
+				roomId: 'room-nb-502',
+				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-tue-21b-2',
+				courseId: 'course-cse-4103',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-503',
+				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			
+			// TUESDAY - Batch 20B
+			{
+				id: 'entry-tue-20b-1',
+				courseId: 'course-cse-483',
+				teacherId: 'teacher-itm',
+				roomId: 'room-nb-504',
+				timeSlotId: 'day-Tuesday-0', // 9:30-11:00
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
+			},
+			{
+				id: 'entry-tue-20b-2',
+				courseId: 'course-cse-453',
+				teacherId: 'teacher-fsf',
+				roomId: 'room-nb-505',
+				timeSlotId: 'day-Tuesday-1', // 11:10-12:40
+				departmentId: 'dept-cse',
+				semester: 'Summer-2025',
+				academicYear: '2025'
 			}
 		]);
 
-		selectedDepartmentId.set('dept-1');
+		selectedDepartmentId.set('dept-cse');
 		selectedShift.set('day');
 	});
 

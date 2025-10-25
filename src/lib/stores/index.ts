@@ -26,8 +26,8 @@ export const scheduleEntries: Writable<ScheduleEntry[]> = writable([]);
 // Selected department and shift filters
 export const selectedDepartmentId: Writable<string> = writable('');
 export const selectedShift: Writable<Shift | 'all'> = writable('all');
-export const selectedSemester: Writable<string> = writable('Fall 2025');
-export const selectedAcademicYear: Writable<string> = writable('2025-2026');
+export const selectedSemester: Writable<string> = writable('Summer-2025');
+export const selectedAcademicYear: Writable<string> = writable('2025');
 
 // Derived stores
 export const departmentMap = derived(departments, $departments => 
