@@ -24,7 +24,7 @@ export const timeSlots: Writable<TimeSlot[]> = writable([]);
 export const scheduleEntries: Writable<ScheduleEntry[]> = writable([]);
 
 // Selected department and shift filters
-export const selectedDepartmentId: Writable<string | null> = writable(null);
+export const selectedDepartmentId: Writable<string> = writable('');
 export const selectedShift: Writable<Shift | 'all'> = writable('all');
 export const selectedSemester: Writable<string> = writable('Fall 2025');
 export const selectedAcademicYear: Writable<string> = writable('2025-2026');
@@ -61,17 +61,20 @@ export const filteredTimeSlots = derived(
 
 // Filtered schedule entries
 export const filteredScheduleEntries = derived(
-	[scheduleEntries, selectedDepartmentId, selectedShift, selectedSemester, selectedAcademicYear],
-	([$scheduleEntries, $selectedDepartmentId, $selectedShift, $selectedSemester, $selectedAcademicYear]) => {
+	[scheduleEntries, selectedDepartmentId, selectedShift, selectedSemester, selectedAcademicYear, timeSlotMap],
+	([$scheduleEntries, $selectedDepartmentId, $selectedShift, $selectedSemester, $selectedAcademicYear, $timeSlotMap]) => {
 		return $scheduleEntries.filter(entry => {
 			if ($selectedDepartmentId && entry.departmentId !== $selectedDepartmentId) return false;
 			if ($selectedSemester && entry.semester !== $selectedSemester) return false;
 			if ($selectedAcademicYear && entry.academicYear !== $selectedAcademicYear) return false;
+			
+			// Filter by shift
+			if ($selectedShift !== 'all') {
+				const timeSlot = $timeSlotMap.get(entry.timeSlotId);
+				if (!timeSlot || timeSlot.shift !== $selectedShift) return false;
+			}
+			
 			return true;
-		}).filter(entry => {
-			if ($selectedShift === 'all') return true;
-			// Need to check the time slot's shift
-			return true; // This would need to be implemented with timeSlot lookup
 		});
 	}
 );

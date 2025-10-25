@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { DayOfWeek } from '$lib/types';
+	import type { DayOfWeek, TimeSlot } from '$lib/types';
 	import { 
 		departments, 
 		teachers, 
@@ -12,7 +12,8 @@
 		selectedShift,
 		populatedScheduleEntries,
 		validationResult,
-		currentUser
+		currentUser,
+		filteredTimeSlots
 	} from '$lib/stores';
 	import { generateTimeSlots } from '$lib/utils/scheduler';
 
@@ -150,6 +151,23 @@
 			`${entry.timeSlot.startTime}-${entry.timeSlot.endTime}` === timeRange
 		);
 	}
+
+	// Helper function to get time slot ID for a specific day and time range
+	function getTimeSlotIdForCell(day: DayOfWeek, timeRange: string): string {
+		const entry = $populatedScheduleEntries.find(entry => 
+			entry.timeSlot.day === day && 
+			`${entry.timeSlot.startTime}-${entry.timeSlot.endTime}` === timeRange
+		);
+		if (entry) return entry.timeSlot.id;
+
+		// If no entry exists, find the time slot from all available time slots
+		const allTimeSlots: TimeSlot[] = $filteredTimeSlots;
+		const matchingSlot = allTimeSlots.find((slot: TimeSlot) => 
+			slot.day === day && 
+			`${slot.startTime}-${slot.endTime}` === timeRange
+		);
+		return matchingSlot?.id || '';
+	}
 </script>
 
 <div class="schedule-container">
@@ -157,7 +175,7 @@
 		<h2>Class Schedule</h2>
 		<div class="filters">
 			<select bind:value={$selectedDepartmentId}>
-				<option value={null}>All Departments</option>
+				<option value="">All Departments</option>
 				{#each $departments as dept}
 					<option value={dept.id}>{dept.name}</option>
 				{/each}
@@ -198,11 +216,12 @@
 				<div class="cell time-cell">{timeRange}</div>
 				{#each days as day}
 					{@const entry = getEntryForSlot(day, timeRange)}
+					{@const timeSlotId = getTimeSlotIdForCell(day, timeRange)}
 					<div 
 						class="cell schedule-cell"
 						role="button"
 						tabindex="0"
-						ondrop={(e) => entry?.timeSlot?.id && handleDrop(e, entry.timeSlot.id)}
+						ondrop={(e) => timeSlotId && handleDrop(e, timeSlotId)}
 						ondragover={handleDragOver}
 					>
 						{#if entry}
