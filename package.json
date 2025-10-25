@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "svelte-kit sync && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
@@ -27,6 +27,9 @@
     "vite": "^5.0.0"
   },
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@sveltejs/adapter-node": "^5.0.0",
     "bits-ui": "^2.14.1",
