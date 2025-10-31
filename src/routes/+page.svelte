@@ -221,7 +221,9 @@
         }
 
         function normalizeDuration(value: number) {
-                return Number.isFinite(value) && value >= 30 ? value : 30;
+                if (!Number.isFinite(value)) return 30;
+                const clamped = Math.min(Math.max(value, 30), 180);
+                return clamped;
         }
 
         function handleDurationChange() {
@@ -294,37 +296,94 @@
                                         <p class="text-sm font-medium text-muted-foreground">Adjust slot duration (minutes)</p>
                                         <div class="grid gap-3 sm:grid-cols-3">
                                                 <div class="space-y-2">
-                                                        <Label for="day-duration">Day shift</Label>
-                                                        <Input
-                                                                id="day-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.day}
-                                                                on:input={handleDurationChange}
-                                                        />
+                                                        <Label for="day-duration-slider">Day shift</Label>
+                                                        <div class="space-y-2 rounded-lg border border-border/70 bg-muted/40 p-3">
+                                                                <input
+                                                                        id="day-duration-slider"
+                                                                        class="duration-slider"
+                                                                        type="range"
+                                                                        min="30"
+                                                                        max="180"
+                                                                        step="5"
+                                                                        bind:value={slotDurations.day}
+                                                                        on:input={handleDurationChange}
+                                                                />
+                                                                <div class="flex items-center gap-2">
+                                                                        <Input
+                                                                                id="day-duration"
+                                                                                type="number"
+                                                                                min="30"
+                                                                                step="5"
+                                                                                bind:value={slotDurations.day}
+                                                                                on:input={handleDurationChange}
+                                                                        />
+                                                                        <span class="w-14 text-right text-xs font-medium text-muted-foreground">{slotDurations.day} min</span>
+                                                                </div>
+                                                                <div class="flex justify-between text-[11px] text-muted-foreground">
+                                                                        <span>30</span>
+                                                                        <span>180</span>
+                                                                </div>
+                                                        </div>
                                                 </div>
                                                 <div class="space-y-2">
-                                                        <Label for="evening-duration">Evening</Label>
-                                                        <Input
-                                                                id="evening-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.evening}
-                                                                on:input={handleDurationChange}
-                                                        />
+                                                        <Label for="evening-duration-slider">Evening</Label>
+                                                        <div class="space-y-2 rounded-lg border border-border/70 bg-muted/40 p-3">
+                                                                <input
+                                                                        id="evening-duration-slider"
+                                                                        class="duration-slider"
+                                                                        type="range"
+                                                                        min="30"
+                                                                        max="180"
+                                                                        step="5"
+                                                                        bind:value={slotDurations.evening}
+                                                                        on:input={handleDurationChange}
+                                                                />
+                                                                <div class="flex items-center gap-2">
+                                                                        <Input
+                                                                                id="evening-duration"
+                                                                                type="number"
+                                                                                min="30"
+                                                                                step="5"
+                                                                                bind:value={slotDurations.evening}
+                                                                                on:input={handleDurationChange}
+                                                                        />
+                                                                        <span class="w-14 text-right text-xs font-medium text-muted-foreground">{slotDurations.evening} min</span>
+                                                                </div>
+                                                                <div class="flex justify-between text-[11px] text-muted-foreground">
+                                                                        <span>30</span>
+                                                                        <span>180</span>
+                                                                </div>
+                                                        </div>
                                                 </div>
                                                 <div class="space-y-2">
-                                                        <Label for="weekend-duration">Weekend</Label>
-                                                        <Input
-                                                                id="weekend-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.weekend}
-                                                                on:input={handleDurationChange}
-                                                        />
+                                                        <Label for="weekend-duration-slider">Weekend</Label>
+                                                        <div class="space-y-2 rounded-lg border border-border/70 bg-muted/40 p-3">
+                                                                <input
+                                                                        id="weekend-duration-slider"
+                                                                        class="duration-slider"
+                                                                        type="range"
+                                                                        min="30"
+                                                                        max="180"
+                                                                        step="5"
+                                                                        bind:value={slotDurations.weekend}
+                                                                        on:input={handleDurationChange}
+                                                                />
+                                                                <div class="flex items-center gap-2">
+                                                                        <Input
+                                                                                id="weekend-duration"
+                                                                                type="number"
+                                                                                min="30"
+                                                                                step="5"
+                                                                                bind:value={slotDurations.weekend}
+                                                                                on:input={handleDurationChange}
+                                                                        />
+                                                                        <span class="w-14 text-right text-xs font-medium text-muted-foreground">{slotDurations.weekend} min</span>
+                                                                </div>
+                                                                <div class="flex justify-between text-[11px] text-muted-foreground">
+                                                                        <span>30</span>
+                                                                        <span>180</span>
+                                                                </div>
+                                                        </div>
                                                 </div>
                                         </div>
                                         <p class="text-xs text-muted-foreground">Slot end times are recomputed instantly using the supplied duration.</p>
