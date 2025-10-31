@@ -1,6 +1,6 @@
 <script lang="ts">
         import { onMount } from 'svelte';
-        import type { DayOfWeek, ScheduleEntryPopulated, TimeSlot } from '$lib/types';
+        import type { DayOfWeek, ScheduleEntryPopulated, Shift, TimeSlot } from '$lib/types';
         import {
                 departments,
                 teachers,
@@ -15,7 +15,6 @@
                 currentUser,
                 filteredTimeSlots
         } from '$lib/stores';
-        import { generateTimeSlots } from '$lib/utils/scheduler';
         import {
                 seedCourses,
                 seedDepartments,
@@ -38,6 +37,25 @@
         const EVENING_SHIFT_START_TIMES = ['17:00', '18:30', '20:00'];
         const WEEKEND_SHIFT_START_TIMES = ['09:00', '10:30', '12:00', '14:30', '16:00'];
         const DAY_SHIFT_DAYS: DayOfWeek[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Saturday'];
+        const EVENING_SHIFT_DAYS: DayOfWeek[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+        const WEEKEND_SHIFT_DAYS: DayOfWeek[] = ['Friday', 'Saturday'];
+
+        const SHIFT_KEYS: Shift[] = ['day', 'evening', 'weekend'];
+        const SHIFT_START_TIMES: Record<Shift, string[]> = {
+                day: DAY_SHIFT_START_TIMES,
+                evening: EVENING_SHIFT_START_TIMES,
+                weekend: WEEKEND_SHIFT_START_TIMES
+        };
+        const SHIFT_DAYS: Record<Shift, DayOfWeek[]> = {
+                day: DAY_SHIFT_DAYS,
+                evening: EVENING_SHIFT_DAYS,
+                weekend: WEEKEND_SHIFT_DAYS
+        };
+        const SHIFT_ORDER: Record<Shift, number> = {
+                day: 0,
+                evening: 1,
+                weekend: 2
+        };
 
         const DAY_ORDER: Record<DayOfWeek, number> = {
                 Sunday: 0,
@@ -49,11 +67,20 @@
                 Saturday: 6
         };
 
-        let slotDurations = {
-                day: 90,
-                evening: 90,
-                weekend: 90
-        };
+        const DEFAULT_DURATION = 90;
+
+        type SlotDurations = Record<Shift, Record<string, number>>;
+
+        function buildInitialSlotDurations(): SlotDurations {
+                return SHIFT_KEYS.reduce<SlotDurations>((acc, shift) => {
+                        acc[shift] = Object.fromEntries(
+                                SHIFT_START_TIMES[shift].map(startTime => [startTime, DEFAULT_DURATION])
+                        );
+                        return acc;
+                }, { day: {}, evening: {}, weekend: {} } as SlotDurations);
+        }
+
+        let slotDurations: SlotDurations = buildInitialSlotDurations();
 
         let activeTab: 'department' | 'teacher' = 'department';
         let selectedTeacherId = '';
@@ -62,6 +89,7 @@
         let draggedEntry: any = null;
 
         let entriesMap: Map<string, ScheduleEntryPopulated> = new Map();
+        let timeSlotLookup: Map<string, TimeSlot> = new Map();
         let html2canvasLib: typeof import('html2canvas')['default'] | null = null;
         let jsPDFLib: typeof import('jspdf')['default'] | null = null;
 
@@ -77,22 +105,36 @@
                 jsPDFLib = jsPDFModule;
         }
 
+        function addMinutes(time: string, minutes: number): string {
+                const [hour, minute] = time.split(':').map(Number);
+                const totalMinutes = hour * 60 + minute + minutes;
+                const newHours = Math.floor(totalMinutes / 60) % 24;
+                const newMinutes = totalMinutes % 60;
+                return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+        }
+
         function refreshTimeSlots() {
-                const daySlots = generateTimeSlots('day', {
-                        durationMinutes: Number(slotDurations.day),
-                        startTimes: DAY_SHIFT_START_TIMES,
-                        days: DAY_SHIFT_DAYS
-                });
-                const eveningSlots = generateTimeSlots('evening', {
-                        durationMinutes: Number(slotDurations.evening),
-                        startTimes: EVENING_SHIFT_START_TIMES
-                });
-                const weekendSlots = generateTimeSlots('weekend', {
-                        durationMinutes: Number(slotDurations.weekend),
-                        startTimes: WEEKEND_SHIFT_START_TIMES
+                const combinedSlots: TimeSlot[] = [];
+
+                SHIFT_KEYS.forEach(shift => {
+                        const startTimes = SHIFT_START_TIMES[shift];
+                        const days = SHIFT_DAYS[shift];
+
+                        days.forEach(day => {
+                                startTimes.forEach((startTime, index) => {
+                                        const duration = slotDurations[shift][startTime] ?? DEFAULT_DURATION;
+                                        combinedSlots.push({
+                                                id: `${shift}-${day}-${index}`,
+                                                day,
+                                                startTime,
+                                                endTime: addMinutes(startTime, duration),
+                                                shift
+                                        });
+                                });
+                        });
                 });
 
-                timeSlots.set([...daySlots, ...eveningSlots, ...weekendSlots]);
+                timeSlots.set(combinedSlots);
         }
 
         async function exportElementToPdf(element: HTMLElement | null, filename: string) {
@@ -161,38 +203,75 @@
                 }
         }
 
-        $: entriesMap = new Map(
-                $populatedScheduleEntries.map(entry => [
-                        `${entry.timeSlot.day}-${entry.timeSlot.startTime}-${entry.timeSlot.endTime}`,
-                        entry
+        function getColumnKey(shift: Shift, startTime: string) {
+                return `${shift}-${startTime}`;
+        }
+
+        function timeToMinutes(time: string) {
+                const [hour, minute] = time.split(':').map(Number);
+                return hour * 60 + minute;
+        }
+
+        function getDurationForSlot(shift: Shift, startTime: string) {
+                return slotDurations[shift][startTime] ?? DEFAULT_DURATION;
+        }
+
+        $: entriesMap = new Map($populatedScheduleEntries.map(entry => [entry.timeSlotId, entry]));
+
+        $: timeSlotLookup = new Map(
+                $filteredTimeSlots.map(slot => [
+                        `${slot.day}-${getColumnKey(slot.shift, slot.startTime)}`,
+                        slot
                 ])
         );
 
-        $: days = Array.from(
-                new Set($populatedScheduleEntries.map(entry => entry.timeSlot.day))
-        ).sort((a, b) => DAY_ORDER[a] - DAY_ORDER[b]) as DayOfWeek[];
+        $: days = Array.from(new Set($filteredTimeSlots.map(slot => slot.day))).sort(
+                (a, b) => DAY_ORDER[a] - DAY_ORDER[b]
+        ) as DayOfWeek[];
 
-        $: timeRanges = Array.from(
-                new Set(
-                        $populatedScheduleEntries.map(
-                                entry => `${entry.timeSlot.startTime}-${entry.timeSlot.endTime}`
-                        )
-                )
-        ).sort((a, b) => a.localeCompare(b));
+        type ColumnDefinition = {
+                key: string;
+                shift: Shift;
+                startTime: string;
+                endTime: string;
+                duration: number;
+        };
 
-        function getEntryForSlot(day: DayOfWeek, timeRange: string) {
-                return entriesMap.get(`${day}-${timeRange}`);
+        $: columnDefinitions = (() => {
+                const map = new Map<string, ColumnDefinition>();
+
+                $filteredTimeSlots.forEach(slot => {
+                        const key = getColumnKey(slot.shift, slot.startTime);
+                        const existing = map.get(key);
+
+                        if (existing) {
+                                existing.endTime = slot.endTime;
+                        } else {
+                                map.set(key, {
+                                        key,
+                                        shift: slot.shift,
+                                        startTime: slot.startTime,
+                                        endTime: slot.endTime,
+                                        duration: getDurationForSlot(slot.shift, slot.startTime)
+                                });
+                        }
+                });
+
+                return Array.from(map.values()).sort((a, b) => {
+                        const shiftDiff = SHIFT_ORDER[a.shift] - SHIFT_ORDER[b.shift];
+                        if (shiftDiff !== 0) return shiftDiff;
+                        return timeToMinutes(a.startTime) - timeToMinutes(b.startTime);
+                });
+        })();
+
+        function getEntryForCell(day: DayOfWeek, columnKey: string) {
+                const slot = timeSlotLookup.get(`${day}-${columnKey}`);
+                if (!slot) return null;
+                return entriesMap.get(slot.id) ?? null;
         }
 
-        function getTimeSlotIdForCell(day: DayOfWeek, timeRange: string): string {
-                const populatedEntry = entriesMap.get(`${day}-${timeRange}`);
-                if (populatedEntry) return populatedEntry.timeSlot.id;
-
-                const allTimeSlots: TimeSlot[] = $filteredTimeSlots;
-                const [startTime, endTime] = timeRange.split('-');
-                const slot = allTimeSlots.find(ts =>
-                        ts.day === day && ts.startTime === startTime && ts.endTime === endTime
-                );
+        function getTimeSlotIdForCell(day: DayOfWeek, columnKey: string): string {
+                const slot = timeSlotLookup.get(`${day}-${columnKey}`);
                 return slot?.id ?? '';
         }
 
@@ -221,15 +300,25 @@
         }
 
         function normalizeDuration(value: number) {
-                return Number.isFinite(value) && value >= 30 ? value : 30;
+                const MIN_DURATION = 30;
+                const MAX_DURATION = 240;
+
+                if (!Number.isFinite(value)) return MIN_DURATION;
+
+                return Math.min(Math.max(value, MIN_DURATION), MAX_DURATION);
         }
 
-        function handleDurationChange() {
+        function handleSlotDurationInput(shift: Shift, startTime: string, value: number) {
+                const normalized = normalizeDuration(value);
+
                 slotDurations = {
-                        day: normalizeDuration(Number(slotDurations.day)),
-                        evening: normalizeDuration(Number(slotDurations.evening)),
-                        weekend: normalizeDuration(Number(slotDurations.weekend))
+                        ...slotDurations,
+                        [shift]: {
+                                ...slotDurations[shift],
+                                [startTime]: normalized
+                        }
                 };
+
                 refreshTimeSlots();
         }
 
@@ -260,8 +349,8 @@
                         <CardTitle>Routine controls</CardTitle>
                         <CardDescription>Filter the routine, tweak time slots and export PDF copies.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                        <div class="grid gap-6 md:grid-cols-2">
+                <CardContent class="space-y-6">
+                        <div class="grid gap-6 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
                                 <div class="space-y-3">
                                         <div>
                                                 <Label for="department">Department</Label>
@@ -290,48 +379,21 @@
                                                 </select>
                                         </div>
                                 </div>
-                                <div class="space-y-4">
-                                        <p class="text-sm font-medium text-muted-foreground">Adjust slot duration (minutes)</p>
-                                        <div class="grid gap-3 sm:grid-cols-3">
-                                                <div class="space-y-2">
-                                                        <Label for="day-duration">Day shift</Label>
-                                                        <Input
-                                                                id="day-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.day}
-                                                                on:input={handleDurationChange}
-                                                        />
-                                                </div>
-                                                <div class="space-y-2">
-                                                        <Label for="evening-duration">Evening</Label>
-                                                        <Input
-                                                                id="evening-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.evening}
-                                                                on:input={handleDurationChange}
-                                                        />
-                                                </div>
-                                                <div class="space-y-2">
-                                                        <Label for="weekend-duration">Weekend</Label>
-                                                        <Input
-                                                                id="weekend-duration"
-                                                                type="number"
-                                                                min="30"
-                                                                step="5"
-                                                                bind:value={slotDurations.weekend}
-                                                                on:input={handleDurationChange}
-                                                        />
-                                                </div>
-                                        </div>
-                                        <p class="text-xs text-muted-foreground">Slot end times are recomputed instantly using the supplied duration.</p>
+                                <div class="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/20 p-4 text-sm text-muted-foreground">
+                                        <p class="font-medium text-foreground">
+                                                Adjust each slot directly in the timetable header.
+                                        </p>
+                                        <p class="mt-2">
+                                                Drag the slider above any time column (30–240 min) or type a value to extend or
+                                                shrink that specific session—perfect for subjects that need two hours or more.
+                                        </p>
+                                        <p class="mt-2 text-xs uppercase tracking-wide text-muted-foreground/80">
+                                                Changes update instantly for every day that uses the slot.
+                                        </p>
                                 </div>
                         </div>
                 </CardContent>
-                <CardFooter className="flex flex-wrap gap-3">
+                <CardFooter class="flex flex-wrap gap-3">
                         <Button on:click={handleExportAll}>Export full routine</Button>
                         <Button
                                 variant={activeTab === 'teacher' ? 'secondary' : 'outline'}
@@ -343,12 +405,12 @@
         </Card>
 
         {#if !$validationResult.valid}
-                <Card className="border-destructive/40 bg-destructive/10 text-destructive">
-                        <CardHeader className="pb-3">
-                                <CardTitle className="text-destructive">Schedule conflicts detected</CardTitle>
-                                <CardDescription className="text-destructive">Resolve the issues below to stabilise the routine.</CardDescription>
+                <Card class="border-destructive/40 bg-destructive/10 text-destructive">
+                        <CardHeader class="pb-3">
+                                <CardTitle class="text-destructive">Schedule conflicts detected</CardTitle>
+                                <CardDescription class="text-destructive">Resolve the issues below to stabilise the routine.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2 text-sm">
+                        <CardContent class="space-y-2 text-sm">
                                 {#each $validationResult.conflicts as conflict}
                                         <p>• {conflict.message}</p>
                                 {/each}
@@ -380,37 +442,80 @@
 
         {#if activeTab === 'department'}
                 <div bind:this={scheduleTableEl}>
-                        <Card className="shadow-sm">
-                        <CardHeader className="pb-4">
-                                <CardTitle>Department timetable</CardTitle>
-                                <CardDescription className="flex flex-wrap gap-2 text-muted-foreground">
-                                        <span>Department: {$selectedDepartmentId ? $departments.find(d => d.id === $selectedDepartmentId)?.name ?? 'All' : 'All'}</span>
-                                        <Separator orientation="vertical" className="hidden h-4 sm:inline" />
-                                        <span>Shift filter: {$selectedShift}</span>
-                                </CardDescription>
-                        </CardHeader>
-                        <CardContent className="overflow-x-auto">
-                                <div class="min-w-[900px] overflow-hidden rounded-xl border">
-                                        <table class="w-full border-collapse text-sm">
-                                                <thead class="bg-muted/70">
-                                                        <tr>
-                                                                <th class="w-48 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                                                        Time
+                        <Card class="shadow-sm">
+                                <CardHeader class="pb-4">
+                                        <CardTitle>Department timetable</CardTitle>
+                                        <CardDescription class="flex flex-wrap items-center gap-2 text-muted-foreground">
+                                                <span>Department: {$selectedDepartmentId ? $departments.find(d => d.id === $selectedDepartmentId)?.name ?? 'All' : 'All'}</span>
+                                                <span class="hidden text-muted-foreground sm:inline">•</span>
+                                                <span>Shift filter: {$selectedShift}</span>
+                                        </CardDescription>
+                                </CardHeader>
+                                <CardContent class="overflow-x-auto">
+                                        <div class="min-w-[900px] overflow-hidden rounded-xl border">
+                                                <table class="w-full border-collapse text-sm">
+                                                        <thead class="bg-muted/70">
+                                                                <tr>
+                                                                <th class="w-44 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                                                        Day
                                                                 </th>
-                                                                {#each days as day}
-                                                                        <th class="border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                                                                {day}
+                                                                {#each columnDefinitions as column}
+                                                                        <th class="border-b border-r px-4 py-3 align-top text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                                                                <div class="space-y-2">
+                                                                                        <div class="flex items-center justify-between gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+                                                                                                <span>{column.shift}</span>
+                                                                                                <span>{column.startTime} – {column.endTime}</span>
+                                                                                        </div>
+                                                                                        <div class="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                                                                                <Input
+                                                                                                        aria-label={`Duration for ${column.shift} slot starting at ${column.startTime}`}
+                                                                                                        class="h-8 w-20 text-right text-xs"
+                                                                                                        min="30"
+                                                                                                        max="240"
+                                                                                                        step="5"
+                                                                                                        type="number"
+                                                                                                        value={slotDurations[column.shift][column.startTime]}
+                                                                                                        on:input={(event) =>
+                                                                                                                handleSlotDurationInput(
+                                                                                                                        column.shift,
+                                                                                                                        column.startTime,
+                                                                                                                        Number((event.target as HTMLInputElement).value)
+                                                                                                                )
+                                                                                                        }
+                                                                                                />
+                                                                                                <span>min</span>
+                                                                                        </div>
+                                                                                        <input
+                                                                                                aria-label={`Drag to adjust the ${column.shift} slot starting at ${column.startTime}`}
+                                                                                                class="w-full cursor-pointer"
+                                                                                                max="240"
+                                                                                                min="30"
+                                                                                                step="5"
+                                                                                                style="accent-color: hsl(var(--primary));"
+                                                                                                type="range"
+                                                                                                value={slotDurations[column.shift][column.startTime]}
+                                                                                                on:input={(event) =>
+                                                                                                        handleSlotDurationInput(
+                                                                                                                column.shift,
+                                                                                                                column.startTime,
+                                                                                                                Number((event.target as HTMLInputElement).value)
+                                                                                                        )
+                                                                                                }
+                                                                                        />
+                                                                                </div>
                                                                         </th>
                                                                 {/each}
                                                         </tr>
                                                 </thead>
                                                 <tbody>
-                                                        {#each timeRanges as timeRange}
+                                                        {#each days as day}
                                                                 <tr class="odd:bg-background even:bg-muted/30">
-                                                                        <td class="border-b border-r px-4 py-4 font-medium text-foreground">{timeRange.replace('-', ' – ')}</td>
-                                                                        {#each days as day}
-                                                                                {@const entry = getEntryForSlot(day, timeRange)}
-                                                                                {@const timeSlotId = getTimeSlotIdForCell(day, timeRange)}
+                                                                        <th scope="row" class="border-b border-r bg-muted/40 px-4 py-4 text-left text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                                                                {day}
+                                                                        </th>
+                                                                        {#each columnDefinitions as column}
+                                                                                {@const entry = getEntryForCell(day, column.key)}
+                                                                                {@const timeSlotId = getTimeSlotIdForCell(day, column.key)}
                                                                                 <td
                                                                                         class="border-b border-r align-top"
                                                                                         on:dragover={handleDragOver}
@@ -423,7 +528,7 @@
                                                                                                         on:dragstart={(event) => handleDragStart(event, entry)}
                                                                                                         role="button"
                                                                                                         tabindex="0"
-                                                                                               >
+                                                                                                >
                                                                                                         <div class="flex items-start justify-between gap-3">
                                                                                                                 <div>
                                                                                                                         <p class="text-xs uppercase tracking-widest opacity-80">{entry.course.code}</p>
@@ -459,62 +564,62 @@
                 </div>
         {:else}
                 <div bind:this={teacherTableEl}>
-                        <Card className="shadow-sm">
-                        <CardHeader className="pb-4">
-                                <CardTitle>Teacher routine overview</CardTitle>
-                                <CardDescription>Focus on a single teacher’s schedule and export their PDF copy.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-5">
-                                <div class="grid gap-4 sm:grid-cols-2">
-                                        <div>
-                                                <Label for="teacher">Teacher</Label>
-                                                <select
-                                                        id="teacher"
-                                                        class="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                        on:change={handleTeacherChange}
-                                                        bind:value={selectedTeacherId}
-                                                >
-                                                        {#each teacherOptions as teacher}
-                                                                <option value={teacher.id}>{teacher.name}</option>
-                                                        {/each}
-                                                </select>
-                                        </div>
-                                        <div class="flex items-end">
-                                                <Button className="w-full sm:w-auto" on:click={handleExportTeacher} disabled={!teacherEntries.length}>
-                                                        Export teacher routine
-                                                </Button>
-                                        </div>
-                                </div>
-                                <Separator />
-                                {#if teacherEntriesSorted.length}
-                                        <div class="overflow-hidden rounded-xl border">
-                                                <table class="w-full border-collapse text-sm">
-                                                        <thead class="bg-muted/70">
-                                                                <tr>
-                                                                        <th class="w-1/4 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Day</th>
-                                                                        <th class="w-1/4 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Time</th>
-                                                                        <th class="border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Course</th>
-                                                                        <th class="border-b px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Room</th>
-                                                                </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                                {#each teacherEntriesSorted as entry}
-                                                                        <tr class="odd:bg-background even:bg-muted/30">
-                                                                                <td class="border-b border-r px-4 py-3 font-medium text-foreground">{entry.timeSlot.day}</td>
-                                                                                <td class="border-b border-r px-4 py-3 text-muted-foreground">{formatTimeRange(entry.timeSlot)}</td>
-                                                                                <td class="border-b border-r px-4 py-3">
-                                                                                        <p class="font-medium text-foreground">{entry.course.name}</p>
-                                                                                        <p class="text-xs uppercase tracking-wide text-muted-foreground">{entry.course.code} · Batch {entry.batch}</p>
-                                                                                </td>
-                                                                                <td class="border-b px-4 py-3 text-muted-foreground">{entry.room.name}</td>
-                                                                        </tr>
+                        <Card class="shadow-sm">
+                                <CardHeader class="pb-4">
+                                        <CardTitle>Teacher routine overview</CardTitle>
+                                        <CardDescription>Focus on a single teacher’s schedule and export their PDF copy.</CardDescription>
+                                </CardHeader>
+                                <CardContent class="space-y-5">
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                        <Label for="teacher">Teacher</Label>
+                                                        <select
+                                                                id="teacher"
+                                                                class="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                                on:change={handleTeacherChange}
+                                                                bind:value={selectedTeacherId}
+                                                        >
+                                                                {#each teacherOptions as teacher}
+                                                                        <option value={teacher.id}>{teacher.name}</option>
                                                                 {/each}
-                                                        </tbody>
-                                                </table>
+                                                        </select>
+                                                </div>
+                                                <div class="flex items-end">
+                                                        <Button class="w-full sm:w-auto" on:click={handleExportTeacher} disabled={!teacherEntries.length}>
+                                                                Export teacher routine
+                                                        </Button>
+                                                </div>
                                         </div>
-                                {:else}
-                                        <p class="text-sm text-muted-foreground">No sessions scheduled for the selected teacher.</p>
-                                {/if}
+                                        <Separator />
+                                        {#if teacherEntriesSorted.length}
+                                                <div class="overflow-hidden rounded-xl border">
+                                                        <table class="w-full border-collapse text-sm">
+                                                                <thead class="bg-muted/70">
+                                                                        <tr>
+                                                                                <th class="w-1/4 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Day</th>
+                                                                                <th class="w-1/4 border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Time</th>
+                                                                                <th class="border-b border-r px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Course</th>
+                                                                                <th class="border-b px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Room</th>
+                                                                        </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                        {#each teacherEntriesSorted as entry}
+                                                                                <tr class="odd:bg-background even:bg-muted/30">
+                                                                                        <td class="border-b border-r px-4 py-3 font-medium text-foreground">{entry.timeSlot.day}</td>
+                                                                                        <td class="border-b border-r px-4 py-3 text-muted-foreground">{formatTimeRange(entry.timeSlot)}</td>
+                                                                                        <td class="border-b border-r px-4 py-3">
+                                                                                                <p class="font-medium text-foreground">{entry.course.name}</p>
+                                                                                                <p class="text-xs uppercase tracking-wide text-muted-foreground">{entry.course.code} · Batch {entry.batch}</p>
+                                                                                        </td>
+                                                                                        <td class="border-b px-4 py-3 text-muted-foreground">{entry.room.name}</td>
+                                                                                </tr>
+                                                                        {/each}
+                                                                </tbody>
+                                                        </table>
+                                                </div>
+                                        {:else}
+                                                <p class="text-sm text-muted-foreground">No sessions scheduled for the selected teacher.</p>
+                                        {/if}
                         </CardContent>
                         </Card>
                 </div>
